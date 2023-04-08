@@ -5,17 +5,22 @@ for the next n days.
 
 import turboself
 
+import json5
 import discord
 from discord.ext import tasks
 from datetime import datetime, timedelta
 
+creds = json5.load(open('creds.jsonc'))
 
 bot = discord.Client(intents = discord.Intents.all())
-client = turboself.Client('xxx', 'xxx', debug = True, login = False)
+client = turboself.Client(creds['TS_ADDR'],
+                          creds['TS_PASS'],
+                          debug = creds['debug'],
+                          login = False)
 
-userid = 00000000000000000000000 # Enter user id here
+userid = creds['USERID']
 
-fov = timedelta(days = 7) # How far the bot can see
+fov = timedelta(days = creds['fov']) # How far the bot can see
 
 @bot.event
 async def on_ready() -> None:
@@ -27,7 +32,7 @@ async def on_ready() -> None:
     looper.start(author)
 
 
-@tasks.loop(hours = 12)
+@tasks.loop(hours = creds['frequency'])
 async def looper(author: discord.User) -> None:
     # Check loop
     
@@ -54,4 +59,4 @@ async def looper(author: discord.User) -> None:
                 raw = day.date.strftime('%A, %d %B %Y')
                 await author.send(f':warning: You do not have reserved for `{raw}`.')
 
-bot.run('bot_token_here')
+bot.run(creds['TOKEN'])
